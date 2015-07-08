@@ -61,10 +61,9 @@ func (d *Dispatcher) Run() {
 		var jobs = make(map[string]*Job)
 		for j := 0; j < d.Args.Concurrency; j++ {
 			i = i + j
-			jobs = d.makeJob()
-			log.Printf("\n %d %d", i)
+			job := d.makeJob()
+			jobs[job.Id] = job
 		}
-		log.Printf("\n == %d", i)
 		d.runBatch(jobs)
 	}
 
@@ -185,8 +184,7 @@ func (d *Dispatcher) readHeaders() []string{
 }
 
 //make job for request
-func (d *Dispatcher) makeJob() map[string]*Job {
-	var jobsChunk = make(map[string]*Job)
+func (d *Dispatcher) makeJob() *Job {
 	job := &Job{
 		Id:service.RandStr(16, "number"),
 		Completed:false,
@@ -194,9 +192,8 @@ func (d *Dispatcher) makeJob() map[string]*Job {
 		Request:d.makeRequest()}
 
 	d.Jobs[job.Id] = job
-	jobsChunk[job.Id] = job
 
-	return jobsChunk
+	return job
 }
 
 //make request object from arguments

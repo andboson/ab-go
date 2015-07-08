@@ -2,7 +2,6 @@ package requests
 
 import (
 	"time"
-	"log"
 )
 
 type Job struct {
@@ -18,9 +17,6 @@ type Job struct {
 func (j *Job) Run(resp chan *Job, completed chan string){
 	response := j.Request.Run(j.Id)
 	j.Response = response
-
-	log.Printf("\n ====== %+v", response.Code)
-
 	timeDuration := time.Since(j.TimeStart)
 	j.Duration = timeDuration.Seconds() * 1000
 	j.Completed = true
