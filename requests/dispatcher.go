@@ -1,13 +1,14 @@
 package requests
 
 import (
-	"math/rand"
 	"time"
 	"log"
 	"os"
 	"bufio"
 	"net/http"
 	"abgo/service"
+	"math"
+	"fmt"
 )
 
 var HttpClient *http.Client
@@ -15,7 +16,7 @@ var DispatcherService *Dispatcher
 
 type Dispatcher struct {
 	Args        *service.Flags
-	Jobs        map[int32]*Job
+	Jobs        map[string]*Job
 	Urls        []string
 	PostData    []string
 	ScannerPost *bufio.Scanner
@@ -23,14 +24,25 @@ type Dispatcher struct {
 	FilePtrPost *os.File
 	FilePtrUrls *os.File
 	Headers     []string
-	Completed   []int32
+	Completed   []string
 	Timeout		int
+	Start 		time.Time
+	Result		*Result
+}
+
+type Result struct {
+	Duration 	string
+	Requests	int
+	Failed		int
+	Rps			string
 }
 
 func init() {
 	makeClient()
 	DispatcherService = &Dispatcher{}
-	DispatcherService.Jobs = make(map[int32]*Job)
+	DispatcherService.Result = &Result{}
+	DispatcherService.Jobs = make(map[string]*Job)
+	DispatcherService.Start = time.Now()
 	DispatcherService.loadParams()
 }
 
@@ -43,41 +55,52 @@ func makeClient(){
 
 // run all processes
 func (d *Dispatcher) Run() {
-	var jobs = make(map[int32]*Job)
 	defer d.FilePtrUrls.Close();
 	defer d.FilePtrPost.Close();
 	for i := 0; i < d.Args.Requests; i++ {
+		var jobs = make(map[string]*Job)
 		for j := 0; j < d.Args.Concurrency; j++ {
+			i = i + j
 			jobs = d.makeJob()
+			log.Printf("\n %d %d", i)
 		}
+		log.Printf("\n == %d", i)
 		d.runBatch(jobs)
 	}
+
+	duration := time.Since(d.Start).Seconds()
+	d.Result.Duration = fmt.Sprintf("%.3fms",duration * 1000)
+	d.Result.Requests = len(d.Jobs)
+	d.Result.Rps = fmt.Sprintf("%.0frps",math.Ceil(float64(d.Result.Requests)/duration))
 }
 
 //run async request in batch for specified amount of concurrency
 //wait for all response
-func (d *Dispatcher) runBatch(jobs map[int32]*Job) {
-	d.Completed = make([]int32, 0)
+func (d *Dispatcher) runBatch(jobs map[string]*Job) {
+	d.Completed = make([]string, 0)
 	batchJobsCount := len(jobs)
 	responseReciever := make(chan *Job, batchJobsCount)
-	completedReciever := make(chan int32, batchJobsCount)
+	completedReciever := make(chan string, batchJobsCount)
 	for _, job := range jobs {
 		go job.Run(responseReciever, completedReciever)
 	}
 
-	for {
-		select {
-		case response := <- responseReciever:
-			d.Jobs[response.Id] = response
-
-		case completed := <-completedReciever:
-			d.Completed = append(d.Completed, completed)
-			if (len(d.Completed) == batchJobsCount) {
-				break
+	func(){
+		for {
+			select {
+			case response := <- responseReciever:
+				d.Jobs[response.Id] = response
+				if(response.Response.Code != 200){
+					d.Result.Failed= d.Result.Failed + 1;
+				}
+			case completed := <-completedReciever:
+				d.Completed = append(d.Completed, completed)
+				if (len(d.Completed) == batchJobsCount) {
+					return;
+				}
 			}
 		}
-	}
-
+	}()
 }
 
 //load all params
@@ -162,18 +185,18 @@ func (d *Dispatcher) readHeaders() []string{
 }
 
 //make job for request
-func (d *Dispatcher) makeJob() map[int32]*Job {
-	var jobs = make(map[int32]*Job)
+func (d *Dispatcher) makeJob() map[string]*Job {
+	var jobsChunk = make(map[string]*Job)
 	job := &Job{
-		Id:rand.Int31n(10),
+		Id:service.RandStr(16, "number"),
 		Completed:false,
 		TimeStart:time.Now(),
 		Request:d.makeRequest()}
 
 	d.Jobs[job.Id] = job
-	jobs[job.Id] = job
+	jobsChunk[job.Id] = job
 
-	return jobs
+	return jobsChunk
 }
 
 //make request object from arguments

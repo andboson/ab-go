@@ -9,5 +9,10 @@ import (
 func  main(){
 	service.Args.CheckUrl()
 	requests.DispatcherService.Run();
-	log.Printf("\n =====", requests.DispatcherService.Jobs)
+	for _, result := range requests.DispatcherService.Jobs{
+//		log.Printf("\n code: %d \n result: %s", result.Response.Code, result.Duration)
+		log.Printf("\n %+v",result)
+	}
+
+	log.Printf("\n results: %+v",requests.DispatcherService.Result)
 }

@@ -28,19 +28,20 @@ func init(){
 	if(match){
 		return
 	}
-	readFlags()
+	ReadFlags()
 }
 
-func readFlags(){
+func ReadFlags(){
 	flags := &Flags{}
-	flags.Requests = *flag.Int("n", 1, "a number of requests")
-	flags.Concurrency = *flag.Int("c", 1, "a number of concurrency requests")
-	flags.PostData = *flag.String("d", "", "a string with post data")
-	flags.PostFile = *flag.String("p", "", "a string, filename of file with postdata")
-	flags.UrlFile = *flag.String("u", "", "a string, filename of file with urls")
-	flags.Header = *flag.String("H", "", "a string, header")
-	flags.HeadersFile = *flag.String("h", "", "a string, filename of file with headers")
-	flags.Timeout = *flag.Int("t", 3000, "a number, milliseconds request timeout")
+	//flags.Requests = *flag.Int("n", 1, "a number of requests")
+	flag.IntVar(&flags.Requests, "n", 1, "a number of requests")
+	flag.IntVar(&flags.Concurrency, "c", 1, "a number of concurrency requests")
+	flag.StringVar(&flags.PostData,"d", "", "a string with post data")
+	flag.StringVar(&flags.PostFile, "p", "", "a string, filename of file with postdata")
+	flag.StringVar(&flags.UrlFile, "u", "", "a string, filename of file with urls")
+	flag.StringVar(&flags.Header, "H", "", "a string, header")
+	flag.StringVar(&flags.HeadersFile, "h", "", "a string, filename of file with headers")
+	flag.IntVar(&flags.Timeout,"t", 3000, "a number, milliseconds request timeout")
 	flags.Url = os.Args[len(os.Args) - 1]
 	flag.Parse()
 	flag.Usage = func() {

@@ -1,7 +1,7 @@
 package requests
 
 type Response struct {
-	JobId		int32
+	JobId		string
 	Code 		int
 	RawResponse	string
 }

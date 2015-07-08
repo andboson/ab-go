@@ -20,7 +20,7 @@ type Request struct {
 	PostData	string
 }
 
-func (r *Request) Run(jobId int32) *Response{
+func (r *Request) Run(jobId string) *Response{
 	var responseText string
 	var status int
 	var reader io.ReadCloser
