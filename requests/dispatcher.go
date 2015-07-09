@@ -41,14 +41,17 @@ type Result struct {
 
 }
 
-func init() {
+func CreateDispatcher() *Dispatcher{
 	makeClient()
 	DispatcherService = &Dispatcher{}
 	DispatcherService.Result = &Result{}
 	DispatcherService.Jobs = make(map[string]*Job)
 	DispatcherService.Start = time.Now()
 	DispatcherService.loadParams()
+
+	return DispatcherService
 }
+
 
 func makeClient(){
 	transport := &http.Transport{

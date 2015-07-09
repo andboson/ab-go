@@ -5,13 +5,27 @@ import (
 	"abgo/service"
 	"abgo/requests"
 	"abgo/templates"
+	"os/exec"
+	"os"
 )
 
 func  main(){
 	service.Args.CheckUrl()
-	requests.DispatcherService.Run();
-//	for _, result := range requests.DispatcherService.Jobs{
-//		log.Printf("\n code: %d \n result: %s", result.Response.Code, result.Duration)
-//	}
-	fmt.Println(templates.Formatter.FormatResult(requests.DispatcherService.Result))
+	run(false)
+	if(service.Args.Tesing){
+		for{
+			run(true)
+		}
+	}
+}
+
+func run(clearScreen bool){
+	dispatcher := requests.CreateDispatcher()
+	dispatcher.Run()
+	if(clearScreen){
+		c := exec.Command("clear")
+		c.Stdout = os.Stdout
+		c.Run()
+	}
+	fmt.Printf("\n %s", templates.Formatter.FormatResult(requests.DispatcherService.Result))
 }
