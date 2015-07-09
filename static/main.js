@@ -10,18 +10,17 @@ $(function() {
 		}
 	})
 
-	$.getJSON('/data?callback=?', function(data) {
 		chart1 = new Highcharts.StockChart({
 			chart: {
 				renderTo: 'container1',
 				zoomType: 'x'
 			},
 			title: {
-				text: 'GC pauses'
+				text: 'Response time'
 			},
 			yAxis: {
 				title: {
-					text: 'Nanoseconds'
+					text: 'Milliseconds'
 				}
 			},
 			scrollbar: {
@@ -47,16 +46,29 @@ $(function() {
 				selected: 3
 			},
 			series: [{
-				name: "GC pauses",
-				data: data.GcPauses,
+				name: "Average response time",
+				data: null,
 				type: 'area',
 				tooltip: {
-					valueSuffix: 'ns'
+					valueSuffix: 'ms'
 				}
-			}]
+			},{
+				name: "Max response time",
+				data: null,
+				type: 'area',
+				tooltip: {
+					valueSuffix: 'ms'
+				}
+             },
+             {
+                name: "Min response time",
+                data: null,
+                type: 'area',
+                tooltip: {
+                    valueSuffix: 'ms'
+                }
+             }]
 		});
-
-	});
 
 	function wsurl() {
 		var l = window.location;
@@ -66,9 +78,11 @@ $(function() {
 	ws = new WebSocket(wsurl());
 	ws.onopen = function () {
 		ws.onmessage = function (evt) {
-			console.log(evt.data)
-		//	var data = JSON.parse(evt.data);
-		//	chart1.series[0].addPoint([data.Ts, data.GcPause], true);
+			//console.log(evt.data)
+			var data = JSON.parse(evt.data);
+			chart1.series[0].addPoint([data.Ts, parseFloat(data.Avg)], true);
+			chart1.series[1].addPoint([data.Ts, parseFloat(data.Max)], true);
+			chart1.series[2].addPoint([data.Ts, parseFloat(data.Min)], true);
 		}
 	};
 })

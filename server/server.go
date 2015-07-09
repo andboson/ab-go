@@ -9,9 +9,8 @@ import (
 	//"sync"
 	"time"
 	"github.com/gorilla/websocket"
-	"fmt"
-	"encoding/json"
 	"sync"
+	"abgo/requests"
 )
 
 const (
@@ -36,21 +35,20 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+// Buffered channel of outbound messages.
+var	Send chan *requests.Result
 
 // connection is an middleman between the websocket connection and the hub.
 type connection struct {
 	// The websocket connection.
 	ws *websocket.Conn
-
-	// Buffered channel of outbound messages.
-	send chan []byte
 }
 
 func Init(){
+	Send = make(chan *requests.Result, 3000)
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/", fs)
 	http.HandleFunc("/ws", serveWs)
-	http.HandleFunc("/data", dataHandler)
 	err := http.ListenAndServe(addr, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
@@ -81,26 +79,30 @@ func (c *connection) write(mt int, payload []byte) error {
 	return c.ws.WriteMessage(mt, payload)
 }
 
+type ResultMessage struct {
+	Ts int64
+	Avg string
+	Max string
+	Min string
+	Rps string
+}
+
 // writePump pumps messages from the hub to the websocket connection.
 func (c *connection) writePump() {
-	ticker := time.NewTicker(pingPeriod)
+	ticker := time.NewTicker( time.Second)
 	defer func() {
 		ticker.Stop()
 		c.ws.Close()
 	}()
 	for {
-		if err := c.write(websocket.TextMessage, []byte("eqweqw")); err != nil {
-			return
-		}
 		select {
-		case message, ok := <-c.send:
-			if !ok {
-				c.write(websocket.CloseMessage, []byte{})
-				return
-			}
-			if err := c.write(websocket.TextMessage, message); err != nil {
-				return
-			}
+		case message := <-Send:
+			res := &ResultMessage{Ts:time.Now().Unix() * 1000, Avg:message.Avg, Max: message.Max, Min:message.Min, Rps:message.Rps}
+			c.ws.WriteJSON(res)
+//			if !ok {
+//				c.write(websocket.CloseMessage, []byte{})
+//				return
+//			}
 		case <-ticker.C:
 			if err := c.write(websocket.PingMessage, []byte{}); err != nil {
 				return
@@ -120,32 +122,8 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	c := &connection{send: make(chan []byte, 256), ws: ws}
+
+	c := &connection{ ws: ws}
 	go c.writePump()
-	c.readPump()
-}
-
-type test struct {
-	word string
-}
-func dataHandler(w http.ResponseWriter, r *http.Request) {
-	mutex.RLock()
-	defer mutex.RUnlock()
-
-	if e := r.ParseForm(); e != nil {
-		log.Fatalln("error pardsing form")
-	}
-
-	callback := r.FormValue("callback")
-
-	fmt.Fprintf(w, "%v(", callback)
-
-	w.Header().Set("Content-Type", "application/json")
-
-
-	data := &test{word:"first"}
-	encoder := json.NewEncoder(w)
-	encoder.Encode(data)
-
-	fmt.Fprint(w, ")")
+	go c.readPump()
 }
