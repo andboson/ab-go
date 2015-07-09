@@ -6,6 +6,8 @@ import (
 	"compress/gzip"
 	"io/ioutil"
 	"io"
+	"log"
+	"strings"
 )
 
 const (
@@ -24,24 +26,34 @@ func (r *Request) Run(jobId string) *Response{
 	var responseText string
 	var status int
 	var reader io.ReadCloser
+	var error error
 	body := bytes.NewBuffer([]byte(r.PostData))
 	request, error := http.NewRequest("POST", r.Url, body)
 	request.Header.Add("Accept-Encoding", "gzip, deflate")
+	for _, header := range r.Headers{
+		headersArray := strings.Split(header, ":")
+		request.Header.Add(headersArray[0], headersArray[1])
+	}
 	HttpClient.Timeout = time.Duration(float64(DispatcherService.Timeout) * float64(time.Second))
 	response, error := HttpClient.Do(request)
-	defer response.Body.Close()
-	status = response.StatusCode
 
-	switch response.Header.Get("Content-Encoding") {
-	case "gzip":
-		reader, error = gzip.NewReader(response.Body)
-		defer reader.Close()
-	default:
-		reader = response.Body
+	if(error == nil) {
+		defer response.Body.Close()
+		status = response.StatusCode
+		switch response.Header.Get("Content-Encoding") {
+		case "gzip":
+			reader, error = gzip.NewReader(response.Body)
+			defer reader.Close()
+		default:
+			reader = response.Body
+		}
+
+		var uncompressed []byte
+		uncompressed, error = ioutil.ReadAll(reader)
+		responseText = string(uncompressed)
+	} else {
+		log.Printf("\n Request error: %s \n request: %s", error, request)
 	}
-
-	uncompressed, error := ioutil.ReadAll(reader)
-	responseText = string(uncompressed)
 
 	if(error != nil){
 		status = 500

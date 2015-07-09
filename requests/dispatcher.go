@@ -35,6 +35,10 @@ type Result struct {
 	Requests	int
 	Failed		int
 	Rps			string
+	Min 		string
+	Max 		string
+	Avg 		string
+
 }
 
 func init() {
@@ -60,17 +64,50 @@ func (d *Dispatcher) Run() {
 	for i := 0; i < d.Args.Requests; i++ {
 		var jobs = make(map[string]*Job)
 		for j := 0; j < d.Args.Concurrency; j++ {
-			i = i + j
-			job := d.makeJob()
+			if(i == d.Args.Requests){
+				break
+			}
+			job := d.createJob()
 			jobs[job.Id] = job
+			i++
 		}
+		i--
 		d.runBatch(jobs)
 	}
+
 
 	duration := time.Since(d.Start).Seconds()
 	d.Result.Duration = fmt.Sprintf("%.3fms",duration * 1000)
 	d.Result.Requests = len(d.Jobs)
 	d.Result.Rps = fmt.Sprintf("%.0frps",math.Ceil(float64(d.Result.Requests)/duration))
+	if(len(d.Jobs) < 1){
+		return
+	}
+
+	var firstJob *Job
+	for _, val := range( d.Jobs){
+		firstJob = val
+		break
+	}
+	min := firstJob.Duration
+	max := firstJob.Duration
+	var total float64
+	for _, result := range d.Jobs{
+		if( result.Duration > max){
+			max = result.Duration
+		}
+		if( result.Duration < min){
+			min = result.Duration
+		}
+		total = total + result.Duration
+	}
+
+	avg := total / float64(len(d.Jobs))
+	d.Result.Avg = fmt.Sprintf("%.3fms", avg)
+	d.Result.Max = fmt.Sprintf("%.3fms", max)
+	d.Result.Min = fmt.Sprintf("%.3fms", min)
+
+	return
 }
 
 //run async request in batch for specified amount of concurrency
@@ -79,9 +116,8 @@ func (d *Dispatcher) runBatch(jobs map[string]*Job) {
 	d.Completed = make([]string, 0)
 	batchJobsCount := len(jobs)
 	responseReciever := make(chan *Job, batchJobsCount)
-	completedReciever := make(chan string, batchJobsCount)
 	for _, job := range jobs {
-		go job.Run(responseReciever, completedReciever)
+		go job.Run(responseReciever)
 	}
 
 	func(){
@@ -90,10 +126,9 @@ func (d *Dispatcher) runBatch(jobs map[string]*Job) {
 			case response := <- responseReciever:
 				d.Jobs[response.Id] = response
 				if(response.Response.Code != 200){
-					d.Result.Failed= d.Result.Failed + 1;
+					d.Result.Failed++
 				}
-			case completed := <-completedReciever:
-				d.Completed = append(d.Completed, completed)
+				d.Completed = append(d.Completed, response.Id)
 				if (len(d.Completed) == batchJobsCount) {
 					return;
 				}
@@ -113,12 +148,12 @@ func (d *Dispatcher) loadParams() {
 		log.Fatalf("You must specify at once one url! ", d.Args.Url)
 	}
 	d.Timeout = d.Args.Timeout
-	d.readHeaders()
+	d.Headers = d.readHeaders()
 }
 
 //reads urls form file specified in -u param or from argument
 func (d *Dispatcher) ReadUrl() string {
-	if (d.Args.Url != "") {
+	if (d.Args.Url != "" && d.Args.UrlFile == "") {
 		return d.Args.Url
 	}
 
@@ -130,7 +165,12 @@ func (d *Dispatcher) ReadUrl() string {
 	d.ScannerUrls.Text()
 
 	if (d.ScannerUrls.Scan()) {
-		return d.ScannerUrls.Text()
+		url := d.ScannerUrls.Text()
+		if(url == ""){
+			return d.ReadUrl()
+		}
+
+		return url
 	} else {
 		d.FilePtrUrls.Close();
 		d.FilePtrUrls = nil
@@ -156,7 +196,12 @@ func (d *Dispatcher) ReadPostData() string {
 	d.ScannerPost.Text()
 
 	if (d.ScannerPost.Scan()) {
-		return d.ScannerPost.Text()
+		text := d.ScannerPost.Text()
+		if(text == ""){
+			return d.ReadPostData()
+		}
+
+		return text
 	} else {
 		d.FilePtrPost.Close();
 		d.FilePtrPost = nil
@@ -169,22 +214,30 @@ func (d *Dispatcher) readHeaders() []string{
 	if (d.Args.Header != "") {
 		d.Headers = append(d.Headers, d.Args.Header)
 	}
-	if (d.Args.HeadersFile == "") {
-		return d.Headers
+	if (d.Args.HeadersFile != "") {
+		file, _ := os.Open(d.Args.HeadersFile)
+		defer file.Close()
+		scanner := bufio.NewScanner(file)
+		scanner.Split(bufio.ScanLines)
+		for scanner.Scan() {
+			text := scanner.Text()
+			d.Headers = append(d.Headers, text)
+		}
+
 	}
-	file, _ := os.Open(d.Args.UrlFile)
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	scanner.Split(bufio.ScanLines)
-	for scanner.Scan() {
-		d.Headers = append(d.Headers, scanner.Text())
+	var holder string
+	for i, val := range d.Headers{
+		if( holder == val){
+			d.Headers = append(d.Headers[:i], d.Headers[i+1:]...)
+		}
+		holder = val
 	}
 
 	return d.Headers
 }
 
 //make job for request
-func (d *Dispatcher) makeJob() *Job {
+func (d *Dispatcher) createJob() *Job {
 	job := &Job{
 		Id:service.RandStr(16, "number"),
 		Completed:false,
@@ -204,9 +257,11 @@ func (d *Dispatcher) makeRequest() *Request {
 	if (postData != "") {
 		method = METHOD_POST;
 	}
-	requestObj.Headers = d.readHeaders()
+	url := d.ReadUrl()
+	headers := d.Headers
+	requestObj.Headers = headers
 	requestObj.PostData = postData
-	requestObj.Url = d.ReadUrl()
+	requestObj.Url = url
 	requestObj.Method = method
 
 	return requestObj
