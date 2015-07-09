@@ -21,6 +21,7 @@ type Flags struct {
 	UrlFile		string
 	HeadersFile	string
 	Tesing		bool
+	Web			bool
 }
 
 func init(){
@@ -44,6 +45,7 @@ func ReadFlags(){
 	flag.StringVar(&flags.HeadersFile, "h", "", "a string, filename of file with headers")
 	flag.IntVar(&flags.Timeout,"t", 3000, "a number, milliseconds request timeout")
 	flag.BoolVar(&flags.Tesing,"test", false, "a flag, testing mode (repeat mode)")
+	flag.BoolVar(&flags.Web,"web", false, "a flag, web mode (see localhost:9999 for results)")
 	flags.Url = os.Args[len(os.Args) - 1]
 	flag.Parse()
 	flag.Usage = func() {

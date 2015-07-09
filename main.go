@@ -7,9 +7,11 @@ import (
 	"abgo/templates"
 	"os/exec"
 	"os"
+	"abgo/server"
 )
 
 func  main(){
+	go server.Init()
 	service.Args.CheckUrl()
 	run(false)
 	if(service.Args.Tesing){
