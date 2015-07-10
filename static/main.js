@@ -1,5 +1,6 @@
 var chart1;
 var chart2;
+var ws;
 
 $(function() {
 	var x = new Date();
@@ -118,11 +119,20 @@ $(function() {
         			}]
         		});
 
-	function wsurl() {
-		var l = window.location;
-		return ((l.protocol === "https:") ? "wss://" : "ws://") + l.hostname + (((l.port != 80) && (l.port != 443)) ? ":" + l.port : "") + "/ws";
-	}
+                //reinit socket, because someone close it
+        		makeSocket();
+        		intervalID = window.setInterval(function(){
+        		    makeSocket();
+        		}, 60 * 1000)
+})
 
+
+function wsurl() {
+    var l = window.location;
+    return ((l.protocol === "https:") ? "wss://" : "ws://") + l.hostname + (((l.port != 80) && (l.port != 443)) ? ":" + l.port : "") + "/ws";
+}
+
+function makeSocket(){
 	ws = new WebSocket(wsurl());
 	ws.onopen = function () {
 		ws.onmessage = function (evt) {
@@ -134,4 +144,4 @@ $(function() {
 			chart2.series[0].addPoint([data.Ts, parseInt(data.Rps)], true);
 		}
 	};
-})
+}

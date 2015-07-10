@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"os"
 	"ab-go/server"
+	"time"
 )
 
 func  main(){
@@ -25,19 +26,27 @@ func run(clearScreen bool, testing bool){
 		c.Stdout = os.Stdout
 		c.Run()
 	}
+
 	if(testing) {
+		ticker := time.NewTicker(time.Second)
 		for {
-			dispatcher := requests.CreateDispatcher()
-			dispatcher.Run()
-			c := exec.Command("clear")
-			c.Stdout = os.Stdout
-			c.Run()
-			fmt.Printf("\n %s", templates.Formatter.FormatResult(requests.DispatcherService.Result))
-			server.Send<-requests.DispatcherService.Result
+			select {
+			case <-ticker.C:
+				dispatcher := requests.CreateDispatcher()
+				dispatcher.Run()
+				c := exec.Command("clear")
+				c.Stdout = os.Stdout
+				c.Run()
+				fmt.Printf("\n %s", templates.Formatter.FormatResult(dispatcher.Result))
+				server.Send<-dispatcher.Result
+			}
 		}
 	} else {
 		dispatcher := requests.CreateDispatcher()
 		dispatcher.Run()
-		fmt.Printf("\n %s", templates.Formatter.FormatResult(requests.DispatcherService.Result))
+		fmt.Printf("\n %s", templates.Formatter.FormatResult(dispatcher.Result))
+		if(dispatcher.Args.SlackUrl != ""){
+			server.SendToSlack(*dispatcher)
+		}
 	}
 }

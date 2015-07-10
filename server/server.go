@@ -54,7 +54,7 @@ func Init(){
 // readPump pumps messages from the websocket connection to the hub.
 func (c *connection) readPump() {
 	defer func() {
-		c.ws.Close()
+		//c.ws.Close()
 	}()
 	c.ws.SetReadLimit(maxMessageSize)
 	c.ws.SetReadDeadline(time.Now().Add(pongWait))
@@ -84,7 +84,7 @@ type ResultMessage struct {
 
 // writePump pumps messages from the hub to the websocket connection.
 func (c *connection) writePump() {
-	ticker := time.NewTicker( time.Second)
+	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
 		c.ws.Close()
@@ -94,10 +94,6 @@ func (c *connection) writePump() {
 		case message := <-Send:
 			res := &ResultMessage{Ts:time.Now().Unix() * 1000, Avg:message.Avg, Max: message.Max, Min:message.Min, Rps:message.Rps}
 			c.ws.WriteJSON(res)
-//			if !ok {
-//				c.write(websocket.CloseMessage, []byte{})
-//				return
-//			}
 		case <-ticker.C:
 			if err := c.write(websocket.PingMessage, []byte{}); err != nil {
 				return
@@ -120,7 +116,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 
 	c := &connection{ ws: ws}
 	go c.writePump()
-	go c.readPump()
+	c.readPump()
 }
 
 
