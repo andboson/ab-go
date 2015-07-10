@@ -46,7 +46,7 @@ Run with this flag and open `localhost:9999` (default port) in your browser
 Data is updated every second.
 
 ##### -port
-Embedded web-serser port. Used with `-test` flag
+Embedded web-server port. Used with `-test` flag
 
 ##### -slack
 String with Slack endpoint url for sending results.
