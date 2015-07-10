@@ -15,43 +15,43 @@ run ./ab-go for usage
 
 ## run options:
 
-#### -n
+##### -n
 Number of requests sended to server.
 
-#### -c
+##### -c
 Number of concurrency requests sended in one batch.
 
-#### -d
+##### -d
 String with post data
 
-#### -p
+##### -p
 String with filename contains post data strings
 
-#### -u
+##### -u
 String with filename contains urls strings
 
-#### -H
+##### -H
 String with header
 
-#### -h
+##### -h
 String with filename contains headers strings
 
-#### -t
+##### -t
 Number of milliseconds request timeout
 
-#### -test
-Testing mode. Run cycled tests with send result to graphics. R
+##### -test
+Testing mode. Enable cycled tests with send results to graphics.
 Run with this flag and open `localhost:9999` (default port) in your browser
 <img src="tests/screenshot.png" />
 Data is updated every second.
 
-#### -port
+##### -port
 Embedded web-serser port. Used with `-test` flag
 
-#### -slack
+##### -slack
 String with Slack endpoint url for sending results.
 
-#### -name
+##### -name
 String of tested api name, who will be presented in results message in Slask. Used with `-slack` flag
 
 -----------------
