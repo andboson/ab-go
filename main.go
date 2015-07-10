@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"abgo/service"
-	"abgo/requests"
-	"abgo/templates"
+	"ab-go/service"
+	"ab-go/requests"
+	"ab-go/templates"
 	"os/exec"
 	"os"
-	"abgo/server"
+	"ab-go/server"
 )
 
 func  main(){

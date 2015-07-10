@@ -1,6 +1,6 @@
 package templates
 import (
-	"abgo/requests"
+	"ab-go/requests"
 	"fmt"
 )
 
