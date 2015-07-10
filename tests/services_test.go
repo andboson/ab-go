@@ -2,8 +2,8 @@ package tests
 
 import (
 	"testing"
-	"ab-go/service"
-	"ab-go/requests"
+	"github.com/andboson/ab-go/service"
+	"github.com/andboson/ab-go/requests"
 )
 
 func TestReadUrls(t *testing.T){

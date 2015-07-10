@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"ab-go/service"
-	"ab-go/requests"
-	"ab-go/templates"
+	"github.com/andboson/ab-go/service"
+	"github.com/andboson/ab-go/requests"
+	"github.com/andboson/ab-go/templates"
 	"os/exec"
 	"os"
-	"ab-go/server"
+	"github.com/andboson/ab-go/server"
 	"time"
 )
 

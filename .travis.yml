@@ -1,6 +1,9 @@
 language: go
 install:
     - go get github.com/jteeuwen/go-bindata/...
+    - go get github.com/gorilla/websocket
 
 script:
     - go test -v ./...
+    - go-bindata -pkg='bindata' -o bindata/bindata.go static/
+    - go build

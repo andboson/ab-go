@@ -6,7 +6,7 @@ import (
 	"os"
 	"bufio"
 	"net/http"
-	"ab-go/service"
+	"github.com/andboson/ab-go/service"
 	"math"
 	"fmt"
 )

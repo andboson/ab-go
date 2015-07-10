@@ -1,6 +1,6 @@
 package templates
 import (
-	"ab-go/requests"
+	"github.com/andboson/ab-go/requests"
 	"fmt"
 )
 

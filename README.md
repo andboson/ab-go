@@ -1,4 +1,4 @@
-# ab-go
+# ab-go [![Build Status](https://travis-ci.org/andboson/ab-go.svg?branch=?branch=master)](https://travis-ci.org/andboson/ab-go)
 
 Inspired by `apache ab testing tool`. Created with `golang`. Add few features.
 
@@ -56,7 +56,7 @@ String of tested api name, who will be presented in results message in Slask. Us
 
 -----------------
 #### build:
-mkdir $GOPATH/src/ab-go && cd $GOPATH/src/ab-go
+mkdir $GOPATH/src/github.com/andboson/ab-go && cd $GOPATH/src/github.com/andboson/ab-go
 
 git clone git@github.com:andboson/ab-go.git .
 
