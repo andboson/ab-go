@@ -4,12 +4,14 @@ run ./ab-go for usage
 
 ## run options:
 
-### -test
+#### -test
 Testing mode. Run cycled tests with send result to graphics. R
 Run with this flag and open `localhost:9999` (default port) in your browser
-<img src="test/screenshot.png" />
+<img src="tests/screenshot.png" />
 Data is updated every second.
 
+#### -port
+Embedded web-serser port. Used with `-test` flag
 
 
 -----------------
