@@ -1,5 +1,16 @@
 # ab-go
 
+Inspired by `apache ab testing tool`. Created with `golang`. Add few features.
+
+You can use:
+
+- File with post data strings
+- File with urls string
+- Headers file
+- Realtime stats
+- Send result to Slack
+
+
 run ./ab-go for usage
 
 ## run options:
@@ -17,5 +28,7 @@ Embedded web-serser port. Used with `-test` flag
 -----------------
 #### build:
 mkdir $GOPATH/src/ab-go && cd $GOPATH/src/ab-go
+
 git clone git@github.com:andboson/ab-go.git .
+
 make
