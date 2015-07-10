@@ -5,9 +5,9 @@ import (
 	 "net/http"
 	"time"
 	"github.com/gorilla/websocket"
-	"ab-go/requests"
-	"ab-go/bindata"
-	"ab-go/service"
+	"github.com/andboson/ab-go/requests"
+	"github.com/andboson/ab-go/bindata"
+	"github.com/andboson/ab-go/service"
 )
 
 const (

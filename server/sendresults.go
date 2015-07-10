@@ -1,6 +1,6 @@
 package server
 import (
-	"ab-go/requests"
+	"github.com/andboson/ab-go/requests"
 	"bytes"
 	"net/http"
 	"log"
@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"net/url"
 	"fmt"
-	"ab-go/templates"
+	"github.com/andboson/ab-go/templates"
 )
 
 type Message struct {
