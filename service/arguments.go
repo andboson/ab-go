@@ -51,7 +51,7 @@ func ReadFlags(){
 	flag.StringVar(&flags.ApiName, "name", "test", "a string, tested api name")
 	flag.IntVar(&flags.Timeout,"t", 3000, "a number, milliseconds request timeout")
 	flag.BoolVar(&flags.Tesing,"test", false, "a flag, testing mode (repeat test)")
-	flag.BoolVar(&flags.Web,"web", false, "a flag, web mode (see localhost:9999 for results)")
+	//flag.BoolVar(&flags.Web,"web", false, "a flag, web mode (see localhost:9999 for results)")
 	flags.Url = os.Args[len(os.Args) - 1]
 	flag.Parse()
 	flag.Usage = func() {
