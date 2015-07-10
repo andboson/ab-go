@@ -1,4 +1,4 @@
-GOPATH=$(CURDIR)/../../
+GOPATH=$(CURDIR)/../../../../
 
 all:godeps  bindata.go build
 
