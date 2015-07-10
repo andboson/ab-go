@@ -1,6 +1,7 @@
 language: go
 install:
     - go get github.com/jteeuwen/go-bindata/...
+    - go get github.com/gorilla/websocket
 
 script:
     - go test -v ./...
