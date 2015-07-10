@@ -48,14 +48,16 @@ $(function() {
 			series: [{
 				name: "Average response time",
 				data: null,
-				type: 'area',
+				color:'blue',
+				type: 'line',
 				tooltip: {
 					valueSuffix: 'ms'
 				}
 			},{
 				name: "Max response time",
 				data: null,
-				type: 'area',
+				color:'red',
+				type: 'line',
 				tooltip: {
 					valueSuffix: 'ms'
 				}
@@ -63,12 +65,58 @@ $(function() {
              {
                 name: "Min response time",
                 data: null,
-                type: 'area',
+                color:'green',
+                type: 'line',
                 tooltip: {
                     valueSuffix: 'ms'
                 }
              }]
 		});
+
+		chart2 = new Highcharts.StockChart({
+        			chart: {
+        				renderTo: 'container2',
+        				zoomType: 'x'
+        			},
+        			title: {
+        				text: 'Requests per seconds'
+        			},
+        			yAxis: {
+        				title: {
+        					text: 'count'
+        				}
+        			},
+        			scrollbar: {
+        				enabled: false
+        			},
+        			rangeSelector: {
+        				buttons: [{
+        					type: 'second',
+        					count: 5,
+        					text: '5s'
+        				}, {
+        					type: 'second',
+        					count: 30,
+        					text: '30s'
+        				}, {
+        					type: 'minute',
+        					count: 1,
+        					text: '1m'
+        				}, {
+        					type: 'all',
+        					text: 'All'
+        				}],
+        				selected: 3
+        			},
+        			series: [{
+        				name: "Rps",
+        				data: null,
+        				type: 'line',
+        				tooltip: {
+        					valueSuffix: ''
+        				}
+        			}]
+        		});
 
 	function wsurl() {
 		var l = window.location;
@@ -83,6 +131,7 @@ $(function() {
 			chart1.series[0].addPoint([data.Ts, parseFloat(data.Avg)], true);
 			chart1.series[1].addPoint([data.Ts, parseFloat(data.Max)], true);
 			chart1.series[2].addPoint([data.Ts, parseFloat(data.Min)], true);
+			chart2.series[0].addPoint([data.Ts, parseInt(data.Rps)], true);
 		}
 	};
 })

@@ -1,16 +1,13 @@
 package server
 
 import (
-	//"encoding/json"
-	//"fmt"
 	"log"
 	 "net/http"
-	//"runtime"
-	//"sync"
 	"time"
 	"github.com/gorilla/websocket"
-	"sync"
 	"abgo/requests"
+	"abgo/bindata"
+	"abgo/service"
 )
 
 const (
@@ -27,9 +24,6 @@ const (
 	maxMessageSize = 512
 )
 
-var addr = ":9999"
-var mutex  sync.RWMutex
-
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -45,9 +39,10 @@ type connection struct {
 }
 
 func Init(){
+	addr := ":" + service.Args.Port
 	Send = make(chan *requests.Result, 3000)
-	fs := http.FileServer(http.Dir("static"))
-	http.Handle("/", fs)
+	http.HandleFunc("/", handleAsset("static/index.html"))
+	http.HandleFunc("/main.js", handleAsset("static/main.js"))
 	http.HandleFunc("/ws", serveWs)
 	err := http.ListenAndServe(addr, nil)
 	if err != nil {
@@ -126,4 +121,24 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	c := &connection{ ws: ws}
 	go c.writePump()
 	go c.readPump()
+}
+
+
+//handle static assets
+func handleAsset(path string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data, err := bindata.Asset(path)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		n, err := w.Write(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if n != len(data) {
+			log.Fatal("wrote less than supposed to")
+		}
+	}
 }

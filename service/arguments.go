@@ -20,6 +20,7 @@ type Flags struct {
 	PostFile	string
 	UrlFile		string
 	HeadersFile	string
+	Port		string
 	Tesing		bool
 	Web			bool
 }
@@ -43,6 +44,7 @@ func ReadFlags(){
 	flag.StringVar(&flags.UrlFile, "u", "", "a string, filename of file with urls")
 	flag.StringVar(&flags.Header, "H", "", "a string, header")
 	flag.StringVar(&flags.HeadersFile, "h", "", "a string, filename of file with headers")
+	flag.StringVar(&flags.Port, "port", "9999", "a string, port of charts server")
 	flag.IntVar(&flags.Timeout,"t", 3000, "a number, milliseconds request timeout")
 	flag.BoolVar(&flags.Tesing,"test", false, "a flag, testing mode (repeat mode)")
 	flag.BoolVar(&flags.Web,"web", false, "a flag, web mode (see localhost:9999 for results)")
