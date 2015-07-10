@@ -1,4 +1,4 @@
-# ab-go [![Build Status](https://travis-ci.org/andboson/ab-go.svg?branch=?branch=master)](https://travis-ci.org/andboson/ab-go)
+# ab-go [![Build Status](https://api.travis-ci.org/andboson/ab-go.svg?branch=masters)](https://travis-ci.org/andboson/ab-go)
 
 Inspired by `apache ab testing tool`. Created with `golang`. Add few features.
 
