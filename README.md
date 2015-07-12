@@ -1,14 +1,15 @@
 # ab-go [![Build Status](https://travis-ci.org/andboson/ab-go.svg?branch=master)](https://travis-ci.org/andboson/ab-go)
 
-Inspired by `apache ab testing tool`. Created with `golang`. Add few features.
-
-You can use:
+Inspired by `apache ab testing tool`. Created with `golang`.
+ 
+ 
+Features:
 
 - File with post data strings
 - File with urls strings
 - Headers file
-- Realtime stats
-- Send result to Slack
+- Real-time stats
+- Sends result to Slack
 
 
 run ./ab-go for usage
@@ -19,7 +20,7 @@ run ./ab-go for usage
 Number of requests sended to server.
 
 ##### -c
-Number of concurrency requests sended in one batch.
+Number of concurrency requests in one batch.
 
 ##### -d
 String with post data
@@ -40,8 +41,9 @@ String with filename contains headers strings
 Number of milliseconds request timeout
 
 ##### -test
-Testing mode. Enable cycled tests with send results to graphics.
-Run with this flag and open `localhost:9999` (default port) in your browser
+String with time duration. Enable cycled tests with sending results to graphics.<br>
+Sample values: "5m", "60s", "24h". Value "0" start endless testing mode.<br>
+Run with this flag and open `localhost:9999` (default port) in your browser<br>
 <img src="tests/screenshot.png" />
 Data is updated every second.
 
@@ -49,7 +51,7 @@ Data is updated every second.
 Embedded web-server port. Used with `-test` flag
 
 ##### -slack
-String with Slack endpoint url for sending results.
+String with Slack endpoint url (incoming WebHoock) for sending results.
 
 ##### -name
 String of tested api name, who will be presented in results message in Slask. Used with `-slack` flag

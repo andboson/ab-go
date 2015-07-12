@@ -80,7 +80,7 @@ $(function() {
         				zoomType: 'x'
         			},
         			title: {
-        				text: 'Requests per seconds'
+        				text: 'Requests per second'
         			},
         			yAxis: {
         				title: {
