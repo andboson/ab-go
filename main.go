@@ -14,10 +14,10 @@ import (
 func main() {
 	go server.Init()
 	service.Args.CheckUrl()
-	//run(false, false)
-	//	if(service.Args.Testing){
-	run(true, true)
-	//	}
+	run(false, false)
+	if (service.Args.Testing != "") {
+		run(true, true)
+	}
 }
 
 func run(clearScreen bool, testing bool) {
