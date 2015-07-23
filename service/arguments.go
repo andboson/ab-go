@@ -51,7 +51,7 @@ func ReadFlags() {
 	flag.StringVar(&flags.SlackUrl, "slack", "", "a string, Slack endpoint to send results")
 	flag.StringVar(&flags.ApiName, "name", "app", "a string, tested api name")
 	flag.IntVar(&flags.Timeout, "t", 3000, "a number, milliseconds request timeout")
-	flag.StringVar(&flags.Testing, "test", "0", "a string time duration of testing mode (repeat test)")
+	flag.StringVar(&flags.Testing, "test", "1s", "a string time duration of testing mode (repeat test)")
 	//flag.BoolVar(&flags.Web,"web", false, "a flag, web mode (see localhost:9999 for results)")
 	flags.Url = os.Args[len(os.Args) - 1]
 	flag.Parse()
