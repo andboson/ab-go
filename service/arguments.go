@@ -1,4 +1,5 @@
 package service
+
 import (
 	"flag"
 	"fmt"
@@ -26,6 +27,7 @@ type Flags struct {
 	ApiName        string
 	Testing        string
 	Web            bool
+	Ka             bool
 }
 
 func init() {
@@ -53,6 +55,7 @@ func ReadFlags() {
 	flag.IntVar(&flags.Timeout, "t", 3000, "a number, milliseconds request timeout")
 	flag.StringVar(&flags.Testing, "test", "1s", "a string time duration of testing mode (repeat test)")
 	//flag.BoolVar(&flags.Web,"web", false, "a flag, web mode (see localhost:9999 for results)")
+	flag.BoolVar(&flags.Ka,"k", false, "a flag, Use HTTP KeepAlive feature")
 	flags.Url = os.Args[len(os.Args) - 1]
 	flag.Parse()
 	flag.Usage = func() {

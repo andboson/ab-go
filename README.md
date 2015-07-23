@@ -56,6 +56,9 @@ String with Slack endpoint url (incoming WebHoock) for sending results.
 ##### -name
 String of tested api name, who will be presented in results message in Slask. Used with `-slack` flag
 
+##### -k
+Use HTTP KeepAlive feature
+
 -----------------
 #### build:
 mkdir $GOPATH/src/github.com/andboson/ab-go && cd $GOPATH/src/github.com/andboson/ab-go
