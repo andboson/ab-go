@@ -48,7 +48,7 @@ func run(clearScreen bool, testing bool) {
 				c := exec.Command("clear")
 				c.Stdout = os.Stdout
 				c.Run()
-				fmt.Printf("#AB-GO testing tool. \n\n Testing %s...\n Open http://localhost:%s for results \n Current results \n %s",
+				fmt.Printf("#AB-GO testing tool. \n\n Testing %s...\n Open http://localhost:%s for results \n Current results: \n %s",
 					service.Args.ApiName,
 					service.Args.Port,
 					templates.Formatter.FormatResult(dispatcher.Result))
@@ -59,7 +59,10 @@ func run(clearScreen bool, testing bool) {
 	} else {
 		dispatcher := requests.CreateDispatcher()
 		dispatcher.Run()
-		fmt.Printf("\n %s", templates.Formatter.FormatResult(dispatcher.Result))
+		fmt.Printf("#AB-GO testing tool. \n\n Testing %s.  \n Results: \n %s",
+			service.Args.ApiName,
+			templates.Formatter.FormatResult(dispatcher.Result))
+
 		if (dispatcher.Args.SlackUrl != "") {
 			server.SendToSlack(*dispatcher)
 		}
