@@ -53,6 +53,8 @@ func run(clearScreen bool, testing bool) {
 					service.Args.Port,
 					templates.Formatter.FormatResult(dispatcher.Result))
 
+				fmt.Printf("\n\n\n Last response: \n\n %s", dispatcher.Result.LastResult)
+
 				server.Send <- dispatcher.Result
 			}
 		}

@@ -136,12 +136,13 @@ function makeSocket(){
 	ws = new WebSocket(wsurl());
 	ws.onopen = function () {
 		ws.onmessage = function (evt) {
-			//console.log(evt.data)
+			///console.log(evt.data)
 			var data = JSON.parse(evt.data);
 			chart1.series[0].addPoint([data.Ts, parseFloat(data.Avg)], true);
 			chart1.series[1].addPoint([data.Ts, parseFloat(data.Max)], true);
 			chart1.series[2].addPoint([data.Ts, parseFloat(data.Min)], true);
 			chart2.series[0].addPoint([data.Ts, parseInt(data.Rps)], true);
+			$('#container3').html(data.LastResult)
 		}
 	};
 }

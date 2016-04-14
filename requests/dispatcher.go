@@ -1,14 +1,14 @@
 package requests
 
 import (
-	"time"
-	"log"
-	"os"
 	"bufio"
-	"net/http"
-	"github.com/andboson/ab-go/service"
-	"math"
 	"fmt"
+	"github.com/andboson/ab-go/service"
+	"log"
+	"math"
+	"net/http"
+	"os"
+	"time"
 )
 
 var HttpClient *http.Client
@@ -25,23 +25,24 @@ type Dispatcher struct {
 	FilePtrUrls *os.File
 	Headers     []string
 	Completed   []string
-	Timeout		int
-	Start 		time.Time
-	Result		*Result
+	Failed      []string
+	Timeout     int
+	Start       time.Time
+	Result      *Result
 }
 
 type Result struct {
-	Duration 	string
-	Requests	int
-	Failed		int
-	Rps			string
-	Min 		string
-	Max 		string
-	Avg 		string
-
+	Duration   string
+	Requests   int
+	Failed     int
+	Rps        string
+	Min        string
+	Max        string
+	Avg        string
+	LastResult string
 }
 
-func CreateDispatcher() *Dispatcher{
+func CreateDispatcher() *Dispatcher {
 	makeClient()
 	DispatcherService = &Dispatcher{}
 	DispatcherService.Result = &Result{}
@@ -52,24 +53,23 @@ func CreateDispatcher() *Dispatcher{
 	return DispatcherService
 }
 
-
-func makeClient(){
+func makeClient() {
 	useKeepAlive := service.Args.Ka
 	transport := &http.Transport{
 		DisableCompression: false,
-		DisableKeepAlives: !useKeepAlive,
+		DisableKeepAlives:  !useKeepAlive,
 	}
 	HttpClient = &http.Client{Transport: transport}
 }
 
 // run all processes
 func (d *Dispatcher) Run() {
-	defer d.FilePtrUrls.Close();
-	defer d.FilePtrPost.Close();
+	defer d.FilePtrUrls.Close()
+	defer d.FilePtrPost.Close()
 	for i := 0; i < d.Args.Requests; i++ {
 		var jobs = make(map[string]*Job)
 		for j := 0; j < d.Args.Concurrency; j++ {
-			if(i == d.Args.Requests){
+			if i == d.Args.Requests {
 				break
 			}
 			job := d.createJob()
@@ -80,28 +80,27 @@ func (d *Dispatcher) Run() {
 		d.runBatch(jobs)
 	}
 
-
 	duration := time.Since(d.Start).Seconds()
-	d.Result.Duration = fmt.Sprintf("%.3fms",duration * 1000)
+	d.Result.Duration = fmt.Sprintf("%.3fms", duration*1000)
 	d.Result.Requests = len(d.Jobs)
-	d.Result.Rps = fmt.Sprintf("%.0frps",math.Ceil(float64(d.Result.Requests)/duration))
-	if(len(d.Jobs) < 1){
+	d.Result.Rps = fmt.Sprintf("%.0frps", math.Ceil(float64(d.Result.Requests)/duration))
+	if len(d.Jobs) < 1 {
 		return
 	}
 
 	var firstJob *Job
-	for _, val := range( d.Jobs){
+	for _, val := range d.Jobs {
 		firstJob = val
 		break
 	}
 	min := firstJob.Duration
 	max := firstJob.Duration
 	var total float64
-	for _, result := range d.Jobs{
-		if( result.Duration > max){
+	for _, result := range d.Jobs {
+		if result.Duration > max {
 			max = result.Duration
 		}
-		if( result.Duration < min){
+		if result.Duration < min {
 			min = result.Duration
 		}
 		total = total + result.Duration
@@ -111,6 +110,11 @@ func (d *Dispatcher) Run() {
 	d.Result.Avg = fmt.Sprintf("%.3fms", avg)
 	d.Result.Max = fmt.Sprintf("%.3fms", max)
 	d.Result.Min = fmt.Sprintf("%.3fms", min)
+	if len(d.Completed) > 0 {
+		completedLastIndex := d.Completed[len(d.Completed)-1]
+		lastJob := d.Jobs[completedLastIndex]
+		d.Result.LastResult = lastJob.Response.RawResponse
+	}
 
 	return
 }
@@ -125,17 +129,17 @@ func (d *Dispatcher) runBatch(jobs map[string]*Job) {
 		go job.Run(responseReciever)
 	}
 
-	func(){
+	func() {
 		for {
 			select {
-			case response := <- responseReciever:
+			case response := <-responseReciever:
 				d.Jobs[response.Id] = response
-				if(response.Response.Code != 200){
+				if response.Response.Code != 200 {
 					d.Result.Failed++
 				}
 				d.Completed = append(d.Completed, response.Id)
-				if (len(d.Completed) == batchJobsCount) {
-					return;
+				if len(d.Completed) == batchJobsCount {
+					return
 				}
 			}
 		}
@@ -145,9 +149,9 @@ func (d *Dispatcher) runBatch(jobs map[string]*Job) {
 //load all params
 func (d *Dispatcher) loadParams() {
 	d.Args = service.Args
-	if (d.Args.UrlFile != "") {
+	if d.Args.UrlFile != "" {
 		return
-	} else if (d.Args.Url != "") {
+	} else if d.Args.Url != "" {
 		d.Urls = append(d.Urls, d.Args.Url)
 	} else {
 		log.Fatalf("You must specify at once one url! ", d.Args.Url)
@@ -158,26 +162,26 @@ func (d *Dispatcher) loadParams() {
 
 //reads urls form file specified in -u param or from argument
 func (d *Dispatcher) ReadUrl() string {
-	if (d.Args.Url != "" && d.Args.UrlFile == "") {
+	if d.Args.Url != "" && d.Args.UrlFile == "" {
 		return d.Args.Url
 	}
 
-	if (d.FilePtrUrls == nil) {
+	if d.FilePtrUrls == nil {
 		d.FilePtrUrls, _ = os.Open(d.Args.UrlFile)
 		d.ScannerUrls = bufio.NewScanner(d.FilePtrUrls)
 	}
 	d.ScannerUrls.Split(bufio.ScanLines)
 	d.ScannerUrls.Text()
 
-	if (d.ScannerUrls.Scan()) {
+	if d.ScannerUrls.Scan() {
 		url := d.ScannerUrls.Text()
-		if(url == ""){
+		if url == "" {
 			return d.ReadUrl()
 		}
 
 		return url
 	} else {
-		d.FilePtrUrls.Close();
+		d.FilePtrUrls.Close()
 		d.FilePtrUrls = nil
 		return d.ReadUrl()
 	}
@@ -185,41 +189,41 @@ func (d *Dispatcher) ReadUrl() string {
 
 //reads postdata form file specified in -p param or string from -d flag
 func (d *Dispatcher) ReadPostData() string {
-	if (d.Args.PostData != "") {
+	if d.Args.PostData != "" {
 		return d.Args.PostData
 	}
 
-	if (d.Args.PostFile == "") {
-		return "";
+	if d.Args.PostFile == "" {
+		return ""
 	}
 
-	if (d.FilePtrPost == nil) {
+	if d.FilePtrPost == nil {
 		d.FilePtrPost, _ = os.Open(d.Args.PostFile)
 		d.ScannerPost = bufio.NewScanner(d.FilePtrPost)
 	}
 	d.ScannerPost.Split(bufio.ScanLines)
 	d.ScannerPost.Text()
 
-	if (d.ScannerPost.Scan()) {
+	if d.ScannerPost.Scan() {
 		text := d.ScannerPost.Text()
-		if(text == ""){
+		if text == "" {
 			return d.ReadPostData()
 		}
 
 		return text
 	} else {
-		d.FilePtrPost.Close();
+		d.FilePtrPost.Close()
 		d.FilePtrPost = nil
 		return d.ReadPostData()
 	}
 }
 
 //reads headers form file specified in -h param or string from -H param
-func (d *Dispatcher) readHeaders() []string{
-	if (d.Args.Header != "") {
+func (d *Dispatcher) readHeaders() []string {
+	if d.Args.Header != "" {
 		d.Headers = append(d.Headers, d.Args.Header)
 	}
-	if (d.Args.HeadersFile != "") {
+	if d.Args.HeadersFile != "" {
 		file, _ := os.Open(d.Args.HeadersFile)
 		defer file.Close()
 		scanner := bufio.NewScanner(file)
@@ -231,8 +235,8 @@ func (d *Dispatcher) readHeaders() []string{
 
 	}
 	var holder string
-	for i, val := range d.Headers{
-		if( holder == val){
+	for i, val := range d.Headers {
+		if holder == val {
 			d.Headers = append(d.Headers[:i], d.Headers[i+1:]...)
 		}
 		holder = val
@@ -244,10 +248,10 @@ func (d *Dispatcher) readHeaders() []string{
 //make job for request
 func (d *Dispatcher) createJob() *Job {
 	job := &Job{
-		Id:service.RandStr(16, "number"),
-		Completed:false,
-		TimeStart:time.Now(),
-		Request:d.makeRequest()}
+		Id:        service.RandStr(16, "number"),
+		Completed: false,
+		TimeStart: time.Now(),
+		Request:   d.makeRequest()}
 
 	d.Jobs[job.Id] = job
 
@@ -259,8 +263,8 @@ func (d *Dispatcher) makeRequest() *Request {
 	requestObj := &Request{}
 	method := METHOD_GET
 	postData := d.ReadPostData()
-	if (postData != "") {
-		method = METHOD_POST;
+	if postData != "" {
+		method = METHOD_POST
 	}
 	url := d.ReadUrl()
 	headers := d.Headers

@@ -1,26 +1,26 @@
 package server
 
 import (
-	"log"
-	 "net/http"
-	"time"
-	"github.com/gorilla/websocket"
-	"github.com/andboson/ab-go/requests"
 	"github.com/andboson/ab-go/bindata"
+	"github.com/andboson/ab-go/requests"
 	"github.com/andboson/ab-go/service"
+	"github.com/gorilla/websocket"
+	"log"
+	"net/http"
+	"time"
 )
 
 const (
-// Time allowed to write a message to the peer.
+	// Time allowed to write a message to the peer.
 	writeWait = 10 * time.Second
 
-// Time allowed to read the next pong message from the peer.
+	// Time allowed to read the next pong message from the peer.
 	pongWait = 60 * time.Second
 
-// Send pings to peer with this period. Must be less than pongWait.
+	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
 
-// Maximum message size allowed from peer.
+	// Maximum message size allowed from peer.
 	maxMessageSize = 512
 )
 
@@ -30,7 +30,7 @@ var upgrader = websocket.Upgrader{
 }
 
 // Buffered channel of outbound messages.
-var	Send chan *requests.Result
+var Send chan *requests.Result
 
 // connection is an middleman between the websocket connection and the hub.
 type connection struct {
@@ -38,7 +38,7 @@ type connection struct {
 	ws *websocket.Conn
 }
 
-func Init(){
+func Init() {
 	addr := ":" + service.Args.Port
 	Send = make(chan *requests.Result, 3000)
 	http.HandleFunc("/", handleAsset("static/index.html"))
@@ -49,7 +49,6 @@ func Init(){
 		log.Fatal("ListenAndServe: ", err)
 	}
 }
-
 
 // readPump pumps messages from the websocket connection to the hub.
 func (c *connection) readPump() {
@@ -75,11 +74,12 @@ func (c *connection) write(mt int, payload []byte) error {
 }
 
 type ResultMessage struct {
-	Ts int64
-	Avg string
-	Max string
-	Min string
-	Rps string
+	Ts         int64
+	Avg        string
+	Max        string
+	Min        string
+	Rps        string
+	LastResult string
 }
 
 // writePump pumps messages from the hub to the websocket connection.
@@ -92,7 +92,14 @@ func (c *connection) writePump() {
 	for {
 		select {
 		case message := <-Send:
-			res := &ResultMessage{Ts:time.Now().Unix() * 1000, Avg:message.Avg, Max: message.Max, Min:message.Min, Rps:message.Rps}
+			res := &ResultMessage{
+				Ts:         time.Now().Unix() * 1000,
+				Avg:        message.Avg,
+				Max:        message.Max,
+				Min:        message.Min,
+				Rps:        message.Rps,
+				LastResult: message.LastResult,
+			}
 			c.ws.WriteJSON(res)
 		case <-ticker.C:
 			if err := c.write(websocket.PingMessage, []byte{}); err != nil {
@@ -114,11 +121,10 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := &connection{ ws: ws}
+	c := &connection{ws: ws}
 	go c.writePump()
 	c.readPump()
 }
-
 
 //handle static assets
 func handleAsset(path string) func(http.ResponseWriter, *http.Request) {

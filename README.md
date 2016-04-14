@@ -42,7 +42,7 @@ Number of milliseconds request timeout
 
 ##### -test
 String with time duration. Enable cycled tests with sending results to graphics.<br>
-Sample values: "5m", "60s", "24h". Value "0" start endless testing mode.<br>
+Sample values: "5m", "60s", "24h". Value "0" starts endless testing mode.<br>
 Run with this flag and open `localhost:9999` (default port) in your browser<br>
 <img src="tests/screenshot.png" />
 Data is updated every second.
@@ -54,7 +54,7 @@ Embedded web-server port. Used with `-test` flag
 String with Slack endpoint url (incoming WebHoock) for sending results.
 
 ##### -name
-String of tested api name, who will be presented in results message in Slask. Used with `-slack` flag
+String of tested api name, who will be presented in results message in Slack. Used with `-slack` flag
 
 ##### -k
 Use HTTP KeepAlive feature
