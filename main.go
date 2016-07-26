@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/andboson/ab-go/service"
 	"github.com/andboson/ab-go/requests"
-	"github.com/andboson/ab-go/templates"
-	"os/exec"
-	"os"
 	"github.com/andboson/ab-go/server"
+	"github.com/andboson/ab-go/service"
+	"github.com/andboson/ab-go/templates"
+	"os"
+	"os/exec"
 	"time"
 )
 
@@ -15,35 +15,35 @@ func main() {
 	go server.Init()
 	service.Args.CheckUrl()
 	run(false, false)
-	if (service.Args.Testing != "") {
+	if service.Args.Testing != "" {
 		run(true, true)
 	}
 }
 
 func run(clearScreen bool, testing bool) {
-	if (clearScreen) {
+	if clearScreen {
 		c := exec.Command("clear")
 		c.Stdout = os.Stdout
 		c.Run()
 	}
 
-	if (service.Args.Testing != "") {
-		var timeout <- chan time.Time
+	if service.Args.Testing != "" {
+		var timeout <-chan time.Time
 		exit := false
 		duration := service.Args.GetDuration()
-		if (duration != 0) {
+		if duration != 0 {
 			timeout = time.After(time.Duration(duration * float64(time.Second)))
 		}
 		ticker := time.NewTicker(time.Second)
+		dispatcher := requests.CreateDispatcher()
 		for {
 			select {
 			case <-timeout:
 				exit = true
 			case <-ticker.C:
-				if (exit) {
+				if exit {
 					return
 				}
-				dispatcher := requests.CreateDispatcher()
 				dispatcher.Run()
 				c := exec.Command("clear")
 				c.Stdout = os.Stdout
@@ -65,7 +65,7 @@ func run(clearScreen bool, testing bool) {
 			service.Args.ApiName,
 			templates.Formatter.FormatResult(dispatcher.Result))
 
-		if (dispatcher.Args.SlackUrl != "") {
+		if dispatcher.Args.SlackUrl != "" {
 			server.SendToSlack(*dispatcher)
 		}
 	}

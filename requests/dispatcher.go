@@ -19,7 +19,7 @@ type Dispatcher struct {
 	Jobs        map[string]*Job
 	Urls        []string
 	PostData    []string
-	ScannerPost *bufio.Scanner
+	ScannerPost *bufio.Reader
 	ScannerUrls *bufio.Scanner
 	FilePtrPost *os.File
 	FilePtrUrls *os.File
@@ -29,6 +29,7 @@ type Dispatcher struct {
 	Timeout     int
 	Start       time.Time
 	Result      *Result
+	PostLines   chan string
 }
 
 type Result struct {
@@ -197,24 +198,34 @@ func (d *Dispatcher) ReadPostData() string {
 		return ""
 	}
 
+	if d.PostLines == nil {
+		d.PostLines = make(chan string)
+		go d.readPostFile(d.PostLines)
+	}
+
+	return <-d.PostLines
+}
+
+func (d *Dispatcher) readPostFile(lines chan string) {
 	if d.FilePtrPost == nil {
 		d.FilePtrPost, _ = os.Open(d.Args.PostFile)
-		d.ScannerPost = bufio.NewScanner(d.FilePtrPost)
+		d.ScannerPost = bufio.NewReader(d.FilePtrPost)
 	}
-	d.ScannerPost.Split(bufio.ScanLines)
-	d.ScannerPost.Text()
 
-	if d.ScannerPost.Scan() {
-		text := d.ScannerPost.Text()
-		if text == "" {
-			return d.ReadPostData()
+	for {
+		line, _, err := d.ScannerPost.ReadLine()
+		if err == nil {
+			text := string(line)
+			if text == "" {
+				d.readPostFile(lines)
+			}
+
+			lines <- text
+		} else {
+			d.FilePtrPost.Close()
+			d.FilePtrPost = nil
+			d.readPostFile(lines)
 		}
-
-		return text
-	} else {
-		d.FilePtrPost.Close()
-		d.FilePtrPost = nil
-		return d.ReadPostData()
 	}
 }
 
@@ -251,7 +262,8 @@ func (d *Dispatcher) createJob() *Job {
 		Id:        service.RandStr(16, "number"),
 		Completed: false,
 		TimeStart: time.Now(),
-		Request:   d.makeRequest()}
+		Request:   d.makeRequest(),
+	}
 
 	d.Jobs[job.Id] = job
 

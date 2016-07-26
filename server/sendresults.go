@@ -1,15 +1,16 @@
 package server
+
 import (
-	"github.com/andboson/ab-go/requests"
 	"bytes"
-	"net/http"
-	"log"
+	"encoding/json"
+	"fmt"
+	"github.com/andboson/ab-go/requests"
+	"github.com/andboson/ab-go/templates"
 	"io"
 	"io/ioutil"
-	"encoding/json"
+	"log"
+	"net/http"
 	"net/url"
-	"fmt"
-	"github.com/andboson/ab-go/templates"
 )
 
 type Message struct {
@@ -17,17 +18,17 @@ type Message struct {
 }
 
 func SendToSlack(dispatcher requests.Dispatcher) {
-	message := Message{Text:fmt.Sprintf("\n Tested API: %s \n %s",
+	message := Message{Text: fmt.Sprintf("\n Tested API: %s \n %s",
 		dispatcher.Args.ApiName,
 		templates.Formatter.FormatResult(dispatcher.Result))}
 	bodyB, _ := json.Marshal(message)
 	post := "payload=" + url.QueryEscape(string(bodyB))
 	body := bytes.NewBuffer([]byte(post))
 	request, err := http.NewRequest("POST", dispatcher.Args.SlackUrl, body)
-	if ( err == nil) {
+	if err == nil {
 		request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		resp, err := requests.HttpClient.Do(request)
-		if ( err != nil) {
+		if err != nil {
 			var reader io.ReadCloser
 			reader = resp.Body
 			var uncompressed []byte

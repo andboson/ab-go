@@ -1,10 +1,8 @@
 package service
 
-
 import (
 	"crypto/rand"
 )
-
 
 // https://www.socketloop.com/tutorials/golang-how-to-generate-random-string
 func RandStr(strSize int, randType string) string {

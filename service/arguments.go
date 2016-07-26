@@ -3,10 +3,10 @@ package service
 import (
 	"flag"
 	"fmt"
-	"os"
 	"log"
-	"regexp"
+	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 )
 
@@ -15,25 +15,25 @@ var Args *Flags
 type Flags struct {
 	Requests    int
 	Concurrency int
-	Timeout        int
-	Url            string
-	Header        string
+	Timeout     int
+	Url         string
+	Header      string
 	PostData    string
 	PostFile    string
-	UrlFile        string
-	HeadersFile    string
+	UrlFile     string
+	HeadersFile string
 	Port        string
 	SlackUrl    string
-	ApiName        string
-	Testing        string
-	Web            bool
-	Ka             bool
+	ApiName     string
+	Testing     string
+	Web         bool
+	Ka          bool
 }
 
 func init() {
 	curDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 	match, _ := regexp.MatchString("_test", curDir)
-	if (match) {
+	if match {
 		return
 	}
 	ReadFlags()
@@ -55,8 +55,8 @@ func ReadFlags() {
 	flag.IntVar(&flags.Timeout, "t", 3000, "a number, milliseconds request timeout")
 	flag.StringVar(&flags.Testing, "test", "", "a string time duration of testing mode (repeat test)")
 	//flag.BoolVar(&flags.Web,"web", false, "a flag, web mode (see localhost:9999 for results)")
-	flag.BoolVar(&flags.Ka,"k", false, "a flag, Use HTTP KeepAlive feature")
-	flags.Url = os.Args[len(os.Args) - 1]
+	flag.BoolVar(&flags.Ka, "k", false, "a flag, Use HTTP KeepAlive feature")
+	flags.Url = os.Args[len(os.Args)-1]
 	flag.Parse()
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
@@ -67,27 +67,27 @@ func ReadFlags() {
 }
 
 func (f *Flags) CheckUrl() {
-	if (f.UrlFile != "") {
+	if f.UrlFile != "" {
 		return
 	}
 
 	http, _ := regexp.MatchString("http", f.Url)
-	if (len(f.Url) < 10 || !http) {
+	if len(f.Url) < 10 || !http {
 		log.Fatalf("Url incorrect!")
 	}
 }
 
 func (f *Flags) GetDuration() float64 {
 	var second int
-	if (f.Testing == "0") {
+	if f.Testing == "0" {
 		return 0
 	}
 
 	reg := regexp.MustCompile(`(\d+)(\w)`)
 	match := reg.FindStringSubmatch(f.Testing)
-	if (len(match) == 0) {
+	if len(match) == 0 {
 		intval, error := strconv.Atoi(f.Testing)
-		if (error != nil) {
+		if error != nil {
 			log.Fatalf("Cannot get duration, %s", error)
 		}
 
@@ -108,4 +108,3 @@ func (f *Flags) GetDuration() float64 {
 
 	return float64(second)
 }
-

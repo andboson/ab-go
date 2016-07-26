@@ -1,7 +1,8 @@
 package templates
+
 import (
-	"github.com/andboson/ab-go/requests"
 	"fmt"
+	"github.com/andboson/ab-go/requests"
 )
 
 var Formatter *Format
@@ -18,15 +19,13 @@ type Format struct {
 	*string
 }
 
-
-
-func init(){
+func init() {
 	Formatter = &Format{}
 }
 
-func (f *Format) FormatResult(result *requests.Result) string{
+func (f *Format) FormatResult(result *requests.Result) string {
 	string := fmt.Sprintf(ResultString, result.Requests, result.Failed, result.Duration, result.Rps, result.Min,
-		result.Max, result.Avg )
+		result.Max, result.Avg)
 
 	return string
 }

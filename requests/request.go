@@ -1,28 +1,29 @@
 package requests
+
 import (
-	"net/http"
 	"bytes"
-	"time"
 	"compress/gzip"
-	"io/ioutil"
 	"io"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"strings"
+	"time"
 )
 
 const (
-	METHOD_POST="POST"
-	METHOD_GET="GET"
+	METHOD_POST = "POST"
+	METHOD_GET  = "GET"
 )
 
 type Request struct {
-	Url			string
-	Method		string
-	Headers		[]string
-	PostData	string
+	Url      string
+	Method   string
+	Headers  []string
+	PostData string
 }
 
-func (r *Request) Run(jobId string) *Response{
+func (r *Request) Run(jobId string) *Response {
 	var responseText string
 	var status int
 	var reader io.ReadCloser
@@ -30,14 +31,14 @@ func (r *Request) Run(jobId string) *Response{
 	body := bytes.NewBuffer([]byte(r.PostData))
 	request, error := http.NewRequest("POST", r.Url, body)
 	request.Header.Add("Accept-Encoding", "gzip, deflate")
-	for _, header := range r.Headers{
+	for _, header := range r.Headers {
 		headersArray := strings.Split(header, ":")
 		request.Header.Add(headersArray[0], headersArray[1])
 	}
 	HttpClient.Timeout = time.Duration(float64(DispatcherService.Timeout) * float64(time.Second))
 	response, error := HttpClient.Do(request)
 
-	if(error == nil) {
+	if error == nil {
 		defer response.Body.Close()
 		status = response.StatusCode
 		switch response.Header.Get("Content-Encoding") {
@@ -55,13 +56,13 @@ func (r *Request) Run(jobId string) *Response{
 		log.Printf("\n Request error: %s \n request: %s", error, request)
 	}
 
-	if(error != nil){
+	if error != nil {
 		status = 500
 		responseText = error.Error()
 	}
 
 	return &Response{
-		JobId:jobId,
-		Code:status,
-		RawResponse:responseText}
+		JobId:       jobId,
+		Code:        status,
+		RawResponse: responseText}
 }
