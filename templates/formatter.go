@@ -2,7 +2,7 @@ package templates
 
 import (
 	"fmt"
-	"github.com/andboson/ab-go/requests"
+	"github.com/cosmic-chichu/ab-go/requests"
 )
 
 var Formatter *Format

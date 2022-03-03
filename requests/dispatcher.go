@@ -3,7 +3,7 @@ package requests
 import (
 	"bufio"
 	"fmt"
-	"github.com/andboson/ab-go/service"
+	"github.com/cosmic-chichu/ab-go/service"
 	"log"
 	"math"
 	"net/http"

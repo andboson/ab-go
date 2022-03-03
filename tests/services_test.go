@@ -1,8 +1,8 @@
 package tests
 
 import (
-	"github.com/andboson/ab-go/requests"
-	"github.com/andboson/ab-go/service"
+	"github.com/cosmic-chichu/ab-go/requests"
+	"github.com/cosmic-chichu/ab-go/service"
 	"testing"
 )
 

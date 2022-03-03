@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/andboson/ab-go/requests"
-	"github.com/andboson/ab-go/server"
-	"github.com/andboson/ab-go/service"
-	"github.com/andboson/ab-go/templates"
+	"github.com/cosmic-chichu/ab-go/requests"
+	"github.com/cosmic-chichu/ab-go/server"
+	"github.com/cosmic-chichu/ab-go/service"
+	"github.com/cosmic-chichu/ab-go/templates"
 	"os"
 	"os/exec"
 	"time"
