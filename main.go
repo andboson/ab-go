@@ -61,9 +61,12 @@ func run(clearScreen bool, testing bool) {
 	} else {
 		dispatcher := requests.CreateDispatcher()
 		dispatcher.Run()
-		fmt.Printf("#AB-GO testing tool. \n\n Testing %s.  \n Results: \n %s",
-			service.Args.ApiName,
-			templates.Formatter.FormatResult(dispatcher.Result))
+		// fmt.Printf("#AB-GO testing tool. \n\n Testing %s.  \n Results: \n %s",
+		// 	service.Args.ApiName,
+		// 	templates.Formatter.FormatResult(dispatcher.Result))
+		fmt.Println("Requests, Failed, Duration, RPS, Min, Max, Avg")
+		fmt.Printf("%d, %d, %s, %s, %s, %s, %s", dispatcher.Result.Requests, dispatcher.Result.Failed, dispatcher.Result.Duration, dispatcher.Result.Rps, dispatcher.Result.Min,
+		dispatcher.Result.Max, dispatcher.Result.Avg)
 
 		if dispatcher.Args.SlackUrl != "" {
 			server.SendToSlack(*dispatcher)
