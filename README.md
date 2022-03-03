@@ -61,8 +61,8 @@ Use HTTP KeepAlive feature
 
 -----------------
 #### build:
-mkdir $GOPATH/src/github.com/andboson/ab-go && cd $GOPATH/src/github.com/andboson/ab-go
+mkdir -p $GOPATH/src/github.com/cosmic-chichu/ab-go && cd $GOPATH/src/github.com/cosmic-chichu/ab-go
 
-git clone git@github.com:andboson/ab-go.git .
+git clone https://github.com/cosmic-chichu/ab-go.git .
 
 make
