@@ -126,6 +126,7 @@ func (d *Dispatcher) runBatch(jobs map[string]*Job) {
 	d.Completed = make([]string, 0)
 	batchJobsCount := len(jobs)
 	responseReciever := make(chan *Job, batchJobsCount)
+	fmt.Println("JobId, JobStatus, JobDuration, ContentLength")
 	for _, job := range jobs {
 		go job.Run(responseReciever)
 	}

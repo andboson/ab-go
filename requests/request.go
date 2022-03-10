@@ -62,7 +62,8 @@ func (r *Request) Run(jobId string) *Response {
 	}
 
 	return &Response{
-		JobId:       jobId,
-		Code:        status,
-		RawResponse: responseText}
+		JobId:         jobId,
+		Code:          status,
+		RawResponse:   responseText,
+		ContentLength: response.ContentLength}
 }
