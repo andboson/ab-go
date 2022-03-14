@@ -25,6 +25,7 @@ type Request struct {
 
 func (r *Request) Run(jobId string) *Response {
 	var responseText string
+	var contentLength int64
 	var status int
 	var reader io.ReadCloser
 	var error error
@@ -52,6 +53,7 @@ func (r *Request) Run(jobId string) *Response {
 		var uncompressed []byte
 		uncompressed, error = ioutil.ReadAll(reader)
 		responseText = string(uncompressed)
+		contentLength = response.ContentLength
 	} else {
 		log.Printf("\n Request error: %s \n request: %s", error, request)
 	}
@@ -65,5 +67,5 @@ func (r *Request) Run(jobId string) *Response {
 		JobId:         jobId,
 		Code:          status,
 		RawResponse:   responseText,
-		ContentLength: response.ContentLength}
+		ContentLength: contentLength}
 }
