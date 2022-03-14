@@ -20,6 +20,7 @@ func (j *Job) Run(resp chan *Job) {
 	timeDuration := time.Since(j.TimeStart)
 	j.Duration = timeDuration.Seconds() * 1000
 	j.Completed = true
-	fmt.Printf("%s, %d, %v, %d\n", j.Id, j.Response.Code, j.Duration, j.Response.ContentLength)
+	fmt.Printf("%s, %d, %s, %f, %d\n", j.Id, j.Response.Code, j.TimeStart.Format(time.RFC3339), j.Duration,
+		j.Response.ContentLength)
 	resp <- j
 }
