@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	go server.Init()
+	//go server.Init()
 	service.Args.CheckUrl()
 	run(false, false)
 	if service.Args.Testing != "" {
