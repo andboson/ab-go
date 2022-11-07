@@ -53,7 +53,7 @@ func (r *Request) Run(jobId string) *Response {
 		var uncompressed []byte
 		uncompressed, error = ioutil.ReadAll(reader)
 		responseText = string(uncompressed)
-		contentLength = response.ContentLength
+		contentLength = int64(len(responseText))
 	} else {
 		log.Printf("\n Request error: %s \n request: %s", error, request)
 	}

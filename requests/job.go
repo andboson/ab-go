@@ -21,7 +21,7 @@ func (j *Job) Run(resp chan *Job) {
 	timeDuration := time.Since(j.TimeStart)
 	j.Duration = timeDuration.Seconds() * 1000
 	j.Completed = true
-	if j.Response.Code == http.StatusOK {
+	if j.Response.Code != http.StatusOK {
 		fmt.Printf("%s, %d, %s, %f, %d, %s\n", j.Id, j.Response.Code, j.TimeStart.Format(time.RFC3339), j.Duration,
 			j.Response.ContentLength, j.Response.RawResponse)
 	} else {
