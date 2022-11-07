@@ -2,6 +2,7 @@ package requests
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 )
 
@@ -20,7 +21,12 @@ func (j *Job) Run(resp chan *Job) {
 	timeDuration := time.Since(j.TimeStart)
 	j.Duration = timeDuration.Seconds() * 1000
 	j.Completed = true
-	fmt.Printf("%s, %d, %s, %f, %d\n", j.Id, j.Response.Code, j.TimeStart.Format(time.RFC3339), j.Duration,
-		j.Response.ContentLength)
+	if j.Response.Code == http.StatusOK {
+		fmt.Printf("%s, %d, %s, %f, %d, %s\n", j.Id, j.Response.Code, j.TimeStart.Format(time.RFC3339), j.Duration,
+			j.Response.ContentLength, j.Response.RawResponse)
+	} else {
+		fmt.Printf("%s, %d, %s, %f, %d\n", j.Id, j.Response.Code, j.TimeStart.Format(time.RFC3339), j.Duration,
+			j.Response.ContentLength)
+	}
 	resp <- j
 }
